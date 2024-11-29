@@ -50,11 +50,6 @@ AMyActor::AMyActor()
 
 void AMyActor::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	//if (HasAuthority())// 仅服务器端处理
-	//{
-	//	
-	//} 
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("zhuangji"));
 	// 第二次撞击销毁MyActor(需要判断撞击的物体是不是子弹)
 	if (isDestroy && OtherActor->IsA(AFPS_UE54_2Projectile::StaticClass())) {
 		if (AFPS_UE54_2PlayerController* PC = Cast<AFPS_UE54_2PlayerController>(OtherActor->GetInstigatorController()))//这里不要用GetOwner，因为子弹撞击到MyActor后Destroy了，拿不到Owner的值
@@ -69,7 +64,7 @@ void AMyActor::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiv
 				AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>();
 				if (GS)
 				{
-					GS->AddPlayerScore(PS, FinalScore);
+					GS->PrintAllPlayersScore();
 				}
 
 			}
@@ -97,7 +92,7 @@ void AMyActor::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiv
 				AMyGameState* GS = GetWorld()->GetGameState<AMyGameState>();
 				if (GS)
 				{
-					GS->AddPlayerScore(PS, FinalScore);
+					GS->PrintAllPlayersScore();
 				}
 
 				//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, FString::Printf(TEXT("111%s:%d"), *PS->GetPlayerName(), PS->GetCurrentScore()));
