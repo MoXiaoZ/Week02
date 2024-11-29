@@ -22,14 +22,108 @@ void AMyGameState::BeginPlay()
 {
     //SpawnMyActors();
 
-    //if (!HasAuthority()) {
-    //    
-    //}
+    if (HasAuthority()) {
+
+        // 设置 GameDuration 秒后调用 EndGameCallback 函数
+        GetWorld()->GetTimerManager().SetTimer(CountdownTimerHandle, this, &AMyGameState::CountdownTick, 1.0f, true);
+    }
     //FTimerHandle TimerHandle;// 定义定时器
     //// 设置 GameDuration 秒后调用 EndGameCallback 函数
     //GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMyGameState::EndGame, GameDuration, false);
         
 }
+
+void AMyGameState::CountdownTick()
+{
+    // Decrease the remaining time
+    GameDuration--;
+
+    // Notify clients of the updated time
+    Multicast_UpdateTimeRemaining(GameDuration);
+
+    // If the time is up, end the game
+    if (GameDuration <= 0)
+    {
+        GetWorldTimerManager().ClearTimer(CountdownTimerHandle);
+        Multicast_EndGame();
+    }
+}
+
+void AMyGameState::Multicast_UpdateTimeRemaining_Implementation(int32 NewTime)
+{
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (PC)
+        {
+            AFPS_UE54_2PlayerController* MyPC = Cast<AFPS_UE54_2PlayerController>(PC);
+            if (MyPC)
+            {
+                //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Black, FString::Printf(TEXT("Player %s"), *(PC->PlayerState->GetPlayerName())));
+                MyPC->UpdateCountdown(NewTime); // 更新客户端的倒计时
+                /*APlayerState* PS = MyPC->PlayerState;
+                if (PS)
+                {
+                    AMyPlayerState* MyPS = Cast<AMyPlayerState>(PS);
+                    MyPS->rtime = NewTime;
+                }*/
+            }
+        }
+    }
+}
+
+void AMyGameState::Multicast_EndGame_Implementation()
+{
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (PC)
+        {
+            AFPS_UE54_2PlayerController* MyPC = Cast<AFPS_UE54_2PlayerController>(PC);
+            if (MyPC)
+            {
+                //GetAndPrintAllPlayersScore();
+
+                FString resultstr=TEXT("Player:Score");
+                int32 totals=0;
+                for (APlayerState* PlayerState : PlayerArray)
+                {
+                    if (AMyPlayerState* MyPlayerState = Cast<AMyPlayerState>(PlayerState))
+                    {
+                        //PSMap.Add(MyPlayerState->GetPlayerName(), FString::FromInt(MyPlayerState->GetCurrentScore()));
+                        resultstr = resultstr + MyPlayerState->GetPlayerName() + TEXT(":") + FString::FromInt(MyPlayerState->GetCurrentScore())+ TEXT("\n");
+                        totals = totals + MyPlayerState->GetCurrentScore();
+                        /*GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, FString::Printf(TEXT("Player %s Score: %d"),
+                            *MyPlayerState->GetPlayerName(),
+                            MyPlayerState->GetCurrentScore()));*/
+                    }
+                }
+                
+                resultstr += TEXT("Toal Score:") + FString::FromInt(totals);
+                MyPC->UpdateScoreList(resultstr);
+            }
+        }
+    }
+
+    /*if (!HasAuthority()) return;
+
+    CalculateTotalScore();
+
+    for (APlayerState* PlayerState : PlayerArray)
+    {
+        if (AMyPlayerState* MyPlayerState = Cast<AMyPlayerState>(PlayerState))
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Player %s Score: %d"),
+                *MyPlayerState->GetPlayerName(),
+                MyPlayerState->GetCurrentScore()));
+        }
+    }
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Total Score: %d"), TotalScore));
+
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Game Over! ")));*/
+
+}
+
 
 //void AMyGameState::SpawnMyActors()
 //{
@@ -73,17 +167,18 @@ void AMyGameState::PrintAllPlayersScore()
 {
     if (!HasAuthority()) return;// 仅服务器端管理
     //TotalScore = 0;
-
+    //TMap<FString, FString> PSMap;
     for (APlayerState* PlayerState : PlayerArray)
     {
         if (AMyPlayerState* MyPlayerState = Cast<AMyPlayerState>(PlayerState))
         {
-            //TotalScore += MyPlayerState->GetCurrentScore();
+            //PSMap.Add(MyPlayerState->GetPlayerName(), FString::FromInt(MyPlayerState->GetCurrentScore()));
             GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, FString::Printf(TEXT("Player %s Score: %d"),
                 *MyPlayerState->GetPlayerName(),
                 MyPlayerState->GetCurrentScore()));            
         }
     }
+    //return PSMap;
     //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, FString::Printf(TEXT("total:%d"), TotalScore));
 }
 

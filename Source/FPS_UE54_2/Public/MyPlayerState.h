@@ -25,6 +25,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Score")
 	int32 GetCurrentScore() const;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 RemainingTime;
+
 protected:
 	// 当前积分，支持网络同步
 	UPROPERTY(ReplicatedUsing = OnRep_Score, VisibleAnywhere, BlueprintReadOnly, Category = "Score")
@@ -32,6 +35,7 @@ protected:
 
 	// 当分数更新时触发
 	void OnRep_Score();
+
 	
 	
 };

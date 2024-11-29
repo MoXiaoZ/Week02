@@ -27,5 +27,25 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	// End Actor interface
+	// 存储 Widget 的实例
+	UPROPERTY()
+	class UMyUserWidget* MyWidget;
+
+	UPROPERTY()
+	class UUMG_GameEnd* MyGameEndUMG;
+
+	// Widget 类
+	UPROPERTY(EditDefaultsOnly, Category = "UI-Countdown")
+	TSubclassOf<class UMyUserWidget> MyWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI-GameEnd")
+	TSubclassOf<class UUMG_GameEnd> MyGameEndUMGClass;
+
+public:
+	// 更新倒计时
+	void UpdateCountdown(int32 TimeRemaining);
+
+	// 游戏结束更新积分表
+	void UpdateScoreList(FString ScoreList);
+
 };

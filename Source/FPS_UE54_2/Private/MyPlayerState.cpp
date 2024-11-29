@@ -10,6 +10,7 @@ AMyPlayerState::AMyPlayerState()
     CurrentScore = 0;
     bReplicates = true; // ¿ªÆôÍøÂçÍ¬²½
     bAlwaysRelevant = true;
+    RemainingTime = 20;
 }
 
 void AMyPlayerState::AddScore(int32 Points)

@@ -17,7 +17,7 @@ class FPS_UE54_2_API AMyGameState : public AGameStateBase
 public:
     AMyGameState();
 
-    /** 打印所有玩家分数 */
+    /** 获取并打印所有玩家分数 */
     void PrintAllPlayersScore();
 
     /** 全局积分，支持网络同步 */
@@ -30,8 +30,8 @@ public:
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Rules")
     //int32 NumberOfImportantMyActor = 5;  // 重要的Actor数量（重要的Actor得分翻倍）
 
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Rules")
-    //float GameDuration = 25.0f;  // 游戏持续时间
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Rules")
+    float GameDuration = 25.0f;  // 游戏持续时间
 
 
     // 计算总得分
@@ -40,6 +40,9 @@ public:
     //UFUNCTION(NetMulticast, Reliable)
     //void MulticastPrintScores();
 
+
+
+    
 
 protected:
     virtual void BeginPlay() override;
@@ -50,8 +53,18 @@ protected:
 	
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+    UFUNCTION()
+    void CountdownTick();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_UpdateTimeRemaining(int32 NewTime);
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_EndGame();
+
     //void SpawnMyActors();
 
     //void EndGame();
-
+private:
+    FTimerHandle CountdownTimerHandle;
 };
